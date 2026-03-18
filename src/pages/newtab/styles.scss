@@ -1,20 +1,13 @@
 @use "@anori/components/base.scss";
 @use '@anori/components/utils.scss' as utils;
 
-@font-face {
-    font-family: 'Nunito';
-    font-weight: 1 999;
-    font-display: swap;
-    src: url('/assets/Nunito.ttf') format('truetype-variations');
-}
-
 html {
     height: 100vh;
     height: 100dvh;
 }
 
 body {
-    font-family: 'Nunito', BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-family: "Roboto", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;

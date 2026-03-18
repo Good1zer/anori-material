@@ -14,6 +14,13 @@ import { QueryClientProvider } from "@anori/utils/react-query";
 import { anoriSchema, getAnoriStorage } from "@anori/utils/storage";
 import { StorageContext, useStorageValue } from "@anori/utils/storage-lib";
 import { useFolders } from "@anori/utils/user-data/hooks";
+import {
+  DEFAULT_MATERIAL_SEED,
+  applyMaterialYouTheme,
+  getDerivedSeedFromTheme,
+  resolveMaterialDark,
+} from "@anori/utils/user-data/material-theme";
+import { useCurrentTheme } from "@anori/utils/user-data/theme-hooks";
 import { DirectionProvider } from "@radix-ui/react-direction";
 import clsx from "clsx";
 import { AnimatePresence, LazyMotion, MotionConfig, m } from "framer-motion";
@@ -87,6 +94,30 @@ const Start = () => {
           : "left";
 
   const [showBookmarksBar] = useStorageValue(anoriSchema.showBookmarksBar);
+  const [themeMode] = useStorageValue(anoriSchema.themeMode);
+  const [themeSeedColor] = useStorageValue(anoriSchema.themeSeedColor);
+  const [currentTheme] = useCurrentTheme();
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const derivedSeed = getDerivedSeedFromTheme(currentTheme);
+    const seed = themeSeedColor ?? derivedSeed ?? DEFAULT_MATERIAL_SEED;
+
+    const applyThemeNow = (prefersDark: boolean) => {
+      applyMaterialYouTheme({
+        seedColor: seed,
+        dark: resolveMaterialDark(themeMode ?? "auto", prefersDark),
+      });
+    };
+
+    applyThemeNow(media.matches);
+
+    if (themeMode === "auto") {
+      const handler = (event: MediaQueryListEvent) => applyThemeNow(event.matches);
+      media.addEventListener("change", handler);
+      return () => media.removeEventListener("change", handler);
+    }
+  }, [currentTheme, themeMode, themeSeedColor]);
 
   useHotkeys("meta+up, alt+up", () => swithFolderUp());
   useHotkeys("meta+left, alt+left", () => swithFolderUp());

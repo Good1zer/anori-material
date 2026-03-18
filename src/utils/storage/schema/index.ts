@@ -120,6 +120,18 @@ export const schemaV1 = defineSchemaVersion(1, {
     defaultValue: "Greenery",
     tracked: true,
   }),
+  themeMode: cell({
+    key: "themeMode",
+    schema: z.enum(["auto", "light", "dark"]),
+    defaultValue: "auto",
+    tracked: true,
+  }),
+  themeSeedColor: cell({
+    key: "themeSeedColor",
+    schema: z.string().nullable(),
+    defaultValue: null,
+    tracked: true,
+  }),
   customThemes: cell({
     key: "customThemes",
     schema: z.array(CustomThemeSchema),
