@@ -26,6 +26,11 @@ export const resolveMaterialDark = (mode: MaterialThemeMode, prefersDark: boolea
   return mode === "dark";
 };
 
+export const coerceMaterialThemeMode = (value: unknown): MaterialThemeMode => {
+  if (value === "light" || value === "dark" || value === "auto") return value;
+  return "auto";
+};
+
 export const applyMaterialYouTheme = (options: {
   seedColor: string | null | undefined;
   dark: boolean;

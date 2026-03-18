@@ -125,6 +125,14 @@ export default defineConfig(async (env, argv): Promise<RspackOptions> => {
         "...", // Add rules applied by webpack by default
       ],
       rules: [
+        // Allow extension-less ESM imports in material-color-utilities
+        {
+          test: /\.m?js$/,
+          include: /node_modules[\\/]+@material[\\/]+material-color-utilities[\\/]+/,
+          resolve: {
+            fullySpecified: false,
+          },
+        },
         // Typescript TSX
         {
           test: /\.(ts|tsx)$/,

@@ -17,6 +17,7 @@ import { useFolders } from "@anori/utils/user-data/hooks";
 import {
   DEFAULT_MATERIAL_SEED,
   applyMaterialYouTheme,
+  coerceMaterialThemeMode,
   getDerivedSeedFromTheme,
   resolveMaterialDark,
 } from "@anori/utils/user-data/material-theme";
@@ -103,16 +104,17 @@ const Start = () => {
     const derivedSeed = getDerivedSeedFromTheme(currentTheme);
     const seed = themeSeedColor ?? derivedSeed ?? DEFAULT_MATERIAL_SEED;
 
+    const resolvedMode = coerceMaterialThemeMode(themeMode);
     const applyThemeNow = (prefersDark: boolean) => {
       applyMaterialYouTheme({
         seedColor: seed,
-        dark: resolveMaterialDark(themeMode ?? "auto", prefersDark),
+        dark: resolveMaterialDark(resolvedMode, prefersDark),
       });
     };
 
     applyThemeNow(media.matches);
 
-    if (themeMode === "auto") {
+    if (resolvedMode === "auto") {
       const handler = (event: MediaQueryListEvent) => applyThemeNow(event.matches);
       media.addEventListener("change", handler);
       return () => media.removeEventListener("change", handler);
