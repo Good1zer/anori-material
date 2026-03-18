@@ -2,22 +2,7 @@
     height: 140px;
     flex-grow: 1;
     position: relative;
-
-
-    .main-btn {
-        position: absolute;
-        inset: 0;
-        border-radius: 0.75rem;
-        background-size: cover;
-        background-clip: padding-box;
-        border: 0.25rem solid transparent;        
-    }
-
-    &.active {
-        .main-btn {
-            border-color: var(--accent);
-        }
-    }
+    cursor: pointer;
 
     .theme-actions {
         position: absolute;
@@ -29,21 +14,35 @@
         gap: 0.5rem;
     }
 
-    .color-cirles-wrapper {
-        position: absolute;
-        bottom: 0.5rem;
-        left: 0.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        padding: 0.25rem;
-
-        .color-circle {
-            width: 30px;
-            height: 30px;
-            border-radius: 15px;
-        }
+    .theme-plate-body {
+        position: relative;
+        inset: 0;
+        border-radius: 0.75rem;
+        background-size: cover;
+        background-clip: padding-box;
+        min-height: 140px;
     }
+}
+
+.BackgroundPlate.active {
+    outline: 2px solid var(--accent);
+    border-radius: 0.75rem;
+}
+
+.color-cirles-wrapper {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.25rem;
+}
+
+.color-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
 }
 
 .ThemesScreen {
@@ -78,10 +77,9 @@
         }
 
         .blur-settings {
-
-            .Slider {
-                margin-top: 4px;
-            }
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
 
@@ -97,17 +95,6 @@
                 gap: 0.35rem;
             }
 
-            button {
-                width: 2rem;
-                height: 2rem;
-                border-radius: 99999px;
-                outline: 2px solid hsla(var(--text-hsl) / 0.2);
-                cursor: pointer;
-            }
-        }
-
-        .color-picker {
-            align-self: center;
         }
     }
 
@@ -115,5 +102,20 @@
         display: flex;
         gap: 1rem;
         margin-top: 2rem;
+    }
+}
+
+.material-theme-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-self: stretch;
+    margin-bottom: 1rem;
+
+    .control-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
     }
 }

@@ -1,7 +1,7 @@
-import { Button, type ButtonProps } from "@anori/components/Button";
-import { toCss } from "@anori/utils/color";
+import { toCss, toHex } from "@anori/utils/color";
 import { type CustomTheme, anoriSchema, getAnoriStorage } from "@anori/utils/storage";
 import { useStorageValue } from "@anori/utils/storage-lib";
+import { DEFAULT_MATERIAL_SEED, getDerivedSeedFromTheme } from "@anori/utils/user-data/material-theme";
 import {
   type PartialCustomTheme,
   type Theme,
@@ -19,16 +19,44 @@ import { m } from "framer-motion";
 import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
 import browser from "webextension-polyfill";
 import "./ThemesScreen.scss";
-import { ColorPicker } from "@anori/components/ColorPicker";
-import { Slider } from "@anori/components/Slider";
-import { Icon } from "@anori/components/icon/Icon";
-import { builtinIcons } from "@anori/components/icon/builtin-icons";
 import { showOpenFilePicker } from "@anori/utils/files";
 import { useMirrorStateToRef, useRunAfterNextRender } from "@anori/utils/hooks";
 import { guid } from "@anori/utils/misc";
 import { setPageBackground } from "@anori/utils/page";
 import { useCurrentTheme } from "@anori/utils/user-data/theme-hooks";
 import { useTranslation } from "react-i18next";
+import "@material/web/switch/switch.js";
+import "@material/web/textfield/outlined-text-field.js";
+import "@material/web/button/filled-button.js";
+import "@material/web/button/text-button.js";
+import "@material/web/button/outlined-button.js";
+import "@material/web/labs/card/outlined-card.js";
+
+const hexToColor = (hex: string) => {
+  const normalized = hex.replace("#", "");
+  const r = Number.parseInt(normalized.slice(0, 2), 16) / 255;
+  const g = Number.parseInt(normalized.slice(2, 4), 16) / 255;
+  const b = Number.parseInt(normalized.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  let h = 0;
+  if (delta !== 0) {
+    if (max === r) h = ((g - b) / delta) % 6;
+    else if (max === g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
+  }
+  h = Math.round(h * 60);
+  if (h < 0) h += 360;
+  const l = (max + min) / 2;
+  const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+  return {
+    hue: h / 360,
+    saturation: s,
+    lightness: l,
+    alpha: 1,
+  };
+};
 
 const ThemePlate = ({
   theme,
@@ -36,7 +64,8 @@ const ThemePlate = ({
   onEdit,
   onDelete,
   ...props
-}: { theme: Theme; onEdit?: VoidFunction; onDelete?: VoidFunction } & ButtonProps) => {
+}: { theme: Theme; onEdit?: VoidFunction; onDelete?: VoidFunction } & ComponentProps<"div">) => {
+  const isClickable = typeof props.onClick === "function";
   const [backgroundUrl, setBackgroundUrl] = useState(() => {
     return theme.type === "builtin"
       ? browser.runtime.getURL(`/assets/images/backgrounds/previews/${theme.background}`)
@@ -63,44 +92,57 @@ const ThemePlate = ({
   }, [theme]);
 
   return (
-    <div className={clsx("BackgroundPlate", className)}>
-      <Button
-        className="main-btn"
-        style={{ backgroundImage: `url(${backgroundUrl})` }}
-        whileHover={{ scale: 1.05 }}
-        transition={{ type: "spring", duration: 0.1 }}
-        withoutBorder
-        {...props}
-      >
-        <div className="color-cirles-wrapper">
-          <div className="color-circle" style={{ backgroundColor: toCss(theme.colors.background) }} />
-          <div className="color-circle" style={{ backgroundColor: toCss(theme.colors.text) }} />
-          <div className="color-circle" style={{ backgroundColor: toCss(theme.colors.accent) }} />
+    <div
+      className={clsx("BackgroundPlate", className)}
+      role={isClickable ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      {...props}
+    >
+      <md-outlined-card>
+        <div className="theme-plate-body" style={{ backgroundImage: `url(${backgroundUrl})` }}>
+          <div className="color-cirles-wrapper">
+            <div className="color-circle" style={{ backgroundColor: toCss(theme.colors.background) }} />
+            <div className="color-circle" style={{ backgroundColor: toCss(theme.colors.text) }} />
+            <div className="color-circle" style={{ backgroundColor: toCss(theme.colors.accent) }} />
+          </div>
+          <div className="theme-actions">
+            {!!onEdit && (
+              <md-text-button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onEdit();
+                  }
+                }}
+              >
+                <span className="material-symbols-outlined">edit</span>
+              </md-text-button>
+            )}
+            {!!onDelete && (
+              <md-text-button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete();
+                  }
+                }}
+              >
+                <span className="material-symbols-outlined">close</span>
+              </md-text-button>
+            )}
+          </div>
         </div>
-      </Button>
-
-      <div className="theme-actions">
-        {!!onEdit && (
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-          >
-            <Icon icon={builtinIcons.pencil} height={16} />
-          </Button>
-        )}
-        {!!onDelete && (
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-          >
-            <Icon icon={builtinIcons.close} height={16} />
-          </Button>
-        )}
-      </div>
+      </md-outlined-card>
     </div>
   );
 };
@@ -219,8 +261,6 @@ const ThemeEditor = ({ theme: themeFromProps, onClose }: { theme?: CustomTheme; 
     return () => (backgroundUrl ? URL.revokeObjectURL(backgroundUrl) : undefined);
   }, [backgroundUrl]);
 
-  const [currentlyEditingColor, setCurrentlyEditingColor] = useState<keyof PartialCustomTheme["colors"] | null>(null);
-
   const bgStyles = backgroundUrl
     ? {
         backgroundSize: "cover",
@@ -236,81 +276,120 @@ const ThemeEditor = ({ theme: themeFromProps, onClose }: { theme?: CustomTheme; 
       <div className="theme-editor">
         <div className="theme-preview" style={bgStyles} />
 
-        <Button className="select-bg-btn" onClick={loadBackground}>
+        <md-filled-button
+          className="select-bg-btn"
+          onClick={loadBackground}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              loadBackground();
+            }
+          }}
+        >
           {t("settings.theme.selectBackground")}
-        </Button>
+        </md-filled-button>
 
         <div className="blur-settings">
           <label>{t("settings.theme.blur")}:</label>
-          <Slider
-            value={theme.blur}
+          <md-outlined-text-field
+            type="number"
             min={0}
             max={50}
-            onChange={(val) => setTheme((p) => ({ ...p, blur: val }))}
-            onCommit={(val) => applyBlur(val)}
+            value={String(theme.blur)}
+            onInput={(e: Event) => {
+              const value = Number((e.target as HTMLInputElement & { value: string }).value);
+              const next = Number.isNaN(value) ? 0 : Math.min(50, Math.max(0, value));
+              setTheme((p) => ({ ...p, blur: next }));
+              applyBlur(next);
+            }}
           />
         </div>
         <div className="swatches">
           <div className="swatch-wrapper">
-            <button
-              type="button"
-              onClick={() => setCurrentlyEditingColor("accent")}
-              style={{ background: toCss(theme.colors.accent) }}
+            <md-outlined-text-field
+              type="color"
+              label={t("settings.theme.colorAccent")}
+              value={toHex(theme.colors.accent)}
+              onInput={(e: Event) => {
+                const value = (e.target as HTMLInputElement & { value: string }).value;
+                setTheme((p) => ({
+                  ...p,
+                  colors: {
+                    ...p.colors,
+                    accent: hexToColor(value),
+                  },
+                }));
+                applyPreview();
+              }}
             />
-            <div>{t("settings.theme.colorAccent")}</div>
           </div>
           <div className="swatch-wrapper">
-            <button
-              type="button"
-              onClick={() => setCurrentlyEditingColor("background")}
-              style={{ background: toCss(theme.colors.background) }}
+            <md-outlined-text-field
+              type="color"
+              label={t("settings.theme.colorBackground")}
+              value={toHex(theme.colors.background)}
+              onInput={(e: Event) => {
+                const value = (e.target as HTMLInputElement & { value: string }).value;
+                setTheme((p) => ({
+                  ...p,
+                  colors: {
+                    ...p.colors,
+                    background: hexToColor(value),
+                  },
+                }));
+                applyPreview();
+              }}
             />
-            <div>{t("settings.theme.colorBackground")}</div>
           </div>
           <div className="swatch-wrapper">
-            <button
-              type="button"
-              onClick={() => setCurrentlyEditingColor("text")}
-              style={{ background: toCss(theme.colors.text) }}
+            <md-outlined-text-field
+              type="color"
+              label={t("settings.theme.colorText")}
+              value={toHex(theme.colors.text)}
+              onInput={(e: Event) => {
+                const value = (e.target as HTMLInputElement & { value: string }).value;
+                setTheme((p) => ({
+                  ...p,
+                  colors: {
+                    ...p.colors,
+                    text: hexToColor(value),
+                  },
+                }));
+                applyPreview();
+              }}
             />
-            <div>{t("settings.theme.colorText")}</div>
           </div>
         </div>
-
-        {!!currentlyEditingColor && (
-          <ColorPicker
-            className="color-picker"
-            value={theme.colors[currentlyEditingColor]}
-            onChange={(color) => {
-              const modifiedColor = {
-                ...color,
-                saturation: color.lightness === 1 ? 0 : color.saturation,
-              };
-              setTheme((p) => ({
-                ...p,
-                colors: {
-                  ...p.colors,
-                  [currentlyEditingColor]: modifiedColor,
-                },
-              }));
-              applyPreview();
-            }}
-          />
-        )}
       </div>
 
       <div className="action-buttons">
-        <Button
+        <md-text-button
           onClick={() => {
             onClose();
             applyTheme(currentTheme);
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onClose();
+              applyTheme(currentTheme);
+            }
+          }}
         >
           {t("back")}
-        </Button>
-        <Button disabled={!backgroundUrl} onClick={saveTheme}>
+        </md-text-button>
+        <md-filled-button
+          disabled={!backgroundUrl}
+          onClick={saveTheme}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              saveTheme();
+            }
+          }}
+        >
           {t("save")}
-        </Button>
+        </md-filled-button>
       </div>
     </>
   );
@@ -320,11 +399,69 @@ export const ThemesScreen = (props: ComponentProps<typeof m.div>) => {
   const { t } = useTranslation();
   const [customThemes, setCustomThemes] = useStorageValue(anoriSchema.customThemes);
   const [currentTheme, setTheme] = useStorageValue(anoriSchema.theme);
+  const [themeMode, setThemeMode] = useStorageValue(anoriSchema.themeMode);
+  const [themeSeedColor, setThemeSeedColor] = useStorageValue(anoriSchema.themeSeedColor);
+  const [resolvedTheme] = useCurrentTheme();
   const [editorActive, setEditorActive] = useState(false);
   const [editorTheme, setEditorTheme] = useState<CustomTheme | undefined>(undefined);
+  const derivedSeed = getDerivedSeedFromTheme(resolvedTheme);
+  const effectiveSeed = themeSeedColor ?? derivedSeed ?? DEFAULT_MATERIAL_SEED;
 
   return (
     <m.div {...props} className="ThemesScreen">
+      <div className="material-theme-controls">
+        <div className="control-row">
+          <span>{t("settings.theme.autoDarkMode")}</span>
+          <md-switch
+            selected={themeMode === "auto"}
+            onChange={(e: Event) => {
+              const selected = (e.target as HTMLInputElement & { selected: boolean }).selected;
+              if (selected) {
+                setThemeMode("auto");
+                return;
+              }
+              const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+              setThemeMode(prefersDark ? "dark" : "light");
+            }}
+          />
+        </div>
+        {themeMode !== "auto" && (
+          <div className="control-row">
+            <span>{t("settings.theme.darkMode")}</span>
+            <md-switch
+              selected={themeMode === "dark"}
+              onChange={(e: Event) => {
+                const selected = (e.target as HTMLInputElement & { selected: boolean }).selected;
+                setThemeMode(selected ? "dark" : "light");
+              }}
+            />
+          </div>
+        )}
+        <div className="control-row">
+          <span>{t("settings.theme.autoSeed")}</span>
+          <md-switch
+            selected={themeSeedColor === null}
+            onChange={(e: Event) => {
+              const selected = (e.target as HTMLInputElement & { selected: boolean }).selected;
+              if (selected) {
+                setThemeSeedColor(null);
+              } else {
+                setThemeSeedColor(effectiveSeed);
+              }
+            }}
+          />
+        </div>
+        <md-outlined-text-field
+          type="color"
+          label={t("settings.theme.seedColor")}
+          value={effectiveSeed}
+          disabled={themeSeedColor === null}
+          onInput={(e: Event) => {
+            const value = (e.target as HTMLInputElement & { value: string }).value;
+            setThemeSeedColor(value);
+          }}
+        />
+      </div>
       {editorActive ? (
         <>
           <ThemeEditor theme={editorTheme} onClose={() => setEditorActive(false)} />
@@ -366,7 +503,17 @@ export const ThemesScreen = (props: ComponentProps<typeof m.div>) => {
               );
             })}
           </div>
-          <Button onClick={() => setEditorActive(true)}>{t("settings.theme.createCustom")}</Button>
+          <md-filled-button
+            onClick={() => setEditorActive(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setEditorActive(true);
+              }
+            }}
+          >
+            {t("settings.theme.createCustom")}
+          </md-filled-button>
         </>
       )}
     </m.div>

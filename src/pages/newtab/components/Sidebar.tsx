@@ -6,7 +6,6 @@ import { useHotkeys } from "@anori/utils/hooks";
 import { useStorageValue } from "@anori/utils/storage-lib";
 
 import type { Folder } from "@anori/utils/user-data/types";
-import { FloatingDelayGroup } from "@floating-ui/react";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,7 +13,7 @@ import "./Sidebar.scss";
 import { CLOUD_INTEGRATION_ENABLED } from "@anori/cloud-integration/consts";
 import { useCloudAccount } from "@anori/cloud-integration/hooks";
 import { WhatsNew } from "@anori/components/WhatsNew";
-import { builtinIcons } from "@anori/components/icon/builtin-icons";
+import "@material/web/list/list.js";
 import { CloudAccountModal, SettingsModal } from "@anori/components/lazy-components";
 import { anoriSchema } from "@anori/utils/storage";
 import clsx from "clsx";
@@ -51,7 +50,7 @@ export const Sidebar = ({ folders, activeFolder, orientation, onFolderClick }: S
           mirrorVerticalScrollToHorizontal
         >
           <div className="sidebar-content">
-            <FloatingDelayGroup delay={{ open: 50, close: 50 }}>
+            <md-list>
               {folders.map((f) => {
                 return (
                   <FolderButton
@@ -71,7 +70,8 @@ export const Sidebar = ({ folders, activeFolder, orientation, onFolderClick }: S
               <FolderButton
                 sidebarOrientation={orientation}
                 layoutId="whats-new"
-                icon={builtinIcons.newspaper}
+                icon=""
+                materialSymbol="campaign"
                 name={t("whatsNew")}
                 withRedDot={hasUnreadReleaseNotes ?? false}
                 onClick={() => {
@@ -83,7 +83,8 @@ export const Sidebar = ({ folders, activeFolder, orientation, onFolderClick }: S
                 <FolderButton
                   sidebarOrientation={orientation}
                   layoutId="cloud-account"
-                  icon={builtinIcons.personCircle}
+                  icon=""
+                  materialSymbol="account_circle"
                   name={isConnected ? t("cloud.account") : t("cloud.connect")}
                   onClick={() => setCloudModalVisible(true)}
                 />
@@ -91,11 +92,12 @@ export const Sidebar = ({ folders, activeFolder, orientation, onFolderClick }: S
               <FolderButton
                 sidebarOrientation={orientation}
                 layoutId="settings"
-                icon={builtinIcons.settings}
+                icon=""
+                materialSymbol="settings"
                 name={t("settings.title")}
                 onClick={() => setSettingsVisible(true)}
               />
-            </FloatingDelayGroup>
+            </md-list>
           </div>
         </ScrollArea>
       </div>

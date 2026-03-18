@@ -1,7 +1,6 @@
 import clsx from "clsx";
-import { m } from "framer-motion";
+import "@material/web/list/list-item.js";
 import { type ComponentProps, useState } from "react";
-import { Tooltip } from "./Tooltip";
 import { Icon } from "./icon/Icon";
 import "./FolderButton.scss";
 import { useCurrentlyDragging } from "@anori/utils/drag-and-drop";
@@ -10,67 +9,69 @@ import { DropDestination } from "./DropDestination";
 export type FolderButtonProps = {
   name: string;
   icon: string;
+  materialSymbol?: string;
   active?: boolean;
   withRedDot?: boolean;
   sidebarOrientation: "vertical" | "horizontal";
+  layoutId?: string;
   dropDestination?: {
     id: string;
   };
-} & ComponentProps<typeof m.button>;
+} & ComponentProps<"div">;
 
 export const FolderButton = ({
   name,
   active,
   icon,
+  materialSymbol,
   className,
   withRedDot,
   sidebarOrientation,
   dropDestination,
+  layoutId,
   ...props
 }: FolderButtonProps) => {
   const currentlyDraggingWidget = useCurrentlyDragging({ type: "widget" });
   const [highlightDrop, setHighlightDrop] = useState(false);
 
   const content = (
-    <m.button
-      className={clsx("FolderButton", className, {
-        active: active,
+    <div
+      className={clsx("FolderButton-wrap", className, {
         "drop-destination": currentlyDraggingWidget && !!dropDestination,
         "highlight-drop": highlightDrop,
       })}
+      data-layout-id={layoutId}
       {...props}
     >
-      {active && (
-        <m.div
-          className="background-glow"
-          layoutId="FolderButton-glow"
-          transition={{ duration: 0.2, type: "spring" }}
-        />
-      )}
-      {withRedDot && <m.div className="red-dot" />}
-      <Icon icon={icon} width={24} height={24} />
-    </m.button>
+      <md-list-item type="button" selected={active} title={name}>
+        <span slot="start" className="folder-icon">
+          {materialSymbol ? (
+            <span className="material-symbols-outlined" aria-hidden="true">
+              {materialSymbol}
+            </span>
+          ) : (
+            <Icon icon={icon} width={24} height={24} />
+          )}
+        </span>
+        <span slot="headline">{name}</span>
+        {withRedDot && <span slot="end" className="red-dot" aria-hidden="true" />}
+      </md-list-item>
+    </div>
   );
 
   if (dropDestination) {
     return (
-      <Tooltip label={name} placement={sidebarOrientation === "vertical" ? "right" : "top"}>
-        <DropDestination
-          type="folder"
-          id={dropDestination.id}
-          filter="widget"
-          onDragEnter={() => setHighlightDrop(true)}
-          onDragLeave={() => setHighlightDrop(false)}
-        >
-          {content}
-        </DropDestination>
-      </Tooltip>
+      <DropDestination
+        type="folder"
+        id={dropDestination.id}
+        filter="widget"
+        onDragEnter={() => setHighlightDrop(true)}
+        onDragLeave={() => setHighlightDrop(false)}
+      >
+        {content}
+      </DropDestination>
     );
   }
 
-  return (
-    <Tooltip label={name} placement={sidebarOrientation === "vertical" ? "right" : "top"}>
-      {content}
-    </Tooltip>
-  );
+  return content;
 };

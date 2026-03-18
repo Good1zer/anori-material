@@ -108,7 +108,11 @@
                 "blur": "Blur",
                 "colorAccent": "Accent",
                 "colorBackground": "Background",
-                "colorText": "Text"
+                "colorText": "Text",
+                "autoDarkMode": "Follow system dark mode",
+                "darkMode": "Dark theme",
+                "autoSeed": "Automatic seed color",
+                "seedColor": "Seed color"
             },
             "importExport": {
                 "title": "Import & export",

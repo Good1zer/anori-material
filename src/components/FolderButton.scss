@@ -1,54 +1,27 @@
-@use "@anori/components/utils.scss" as utils;
-
-.FolderButton {
-    padding: 8px;
-    background: none;
-    cursor: pointer;
-    border-radius: 8px;
-    border-color: transparent;
-    border-width: 3px;
-    border-style: solid;
-    color: hsla(var(--text-hsl) / 0.733);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: 0.1s ease-in-out;
+.FolderButton-wrap {
     position: relative;
-    user-select: none;
-    -webkit-user-select: none;
-
-    @include utils.hover {
-        transform: scale(1.15);
-        color: var(--accent);
-    }
+    display: block;
 
     &.drop-destination {
-        border-color: hsla(var(--text-hsl) / 0.25);
+        outline: 1px dashed var(--text-border);
+        border-radius: 12px;
     }
 
     &.highlight-drop {
-        background: hsla(var(--text-hsl) / 0.25);
+        outline: 2px solid var(--accent);
+        border-radius: 12px;
     }
+}
 
-    .background-glow {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: transparent;
-        pointer-events: none;
-        border-radius: 8px;
-        box-shadow: 0px 0px 7px 7px var(--accent-subtle);
-    }
+.folder-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .red-dot {
-        position: absolute;
-        top: 10%;
-        right: 10%;
-        width: 8px;
-        height: 8px;
-        background: rgb(247, 60, 60);
-        border-radius: 4px;
-    }
+.red-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #ff5252;
 }

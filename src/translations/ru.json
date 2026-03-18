@@ -78,7 +78,11 @@
                 "blur": "Размытие",
                 "colorAccent": "Акцент",
                 "colorBackground": "Задний фон",
-                "colorText": "Текст"
+                "colorText": "Текст",
+                "autoDarkMode": "Следовать системной теме",
+                "darkMode": "Тёмная тема",
+                "autoSeed": "Автоматический цвет акцента",
+                "seedColor": "Seed-цвет"
             },
             "importExport": {
                 "title": "Импорт и экспорт",

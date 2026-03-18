@@ -35,6 +35,7 @@ describe("Cell default value type inference", () => {
 
   it("should infer T for cells with default value", () => {
     type WithDefaultResult = ReturnType<TestStorage["get"]> extends infer R ? (R extends string ? true : false) : never;
+    type _WithDefaultResultUsed = WithDefaultResult;
 
     // Cell with defaultValue should have _hasDefault: true
     expectTypeOf(schemaV1.definition.withDefault._hasDefault).toEqualTypeOf<true>();

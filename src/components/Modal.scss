@@ -1,55 +1,16 @@
-.Modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: rgba(0, 0, 0, 0.5);
-    width: 100vw;
-    width: 100dvw;
-    height: 100vh;
-    height: 100dvh;
+.modal-header {
     display: flex;
-    justify-content: center;
+    gap: 16px;
     align-items: center;
-    z-index: 999;
-    padding: 16px;
 }
 
-.Modal-wrapper {
-    border-radius: 24px;
-    background: var(--background);
-    overflow: hidden;
+.modal-header h2 {
+    flex-grow: 1;
+    line-height: 1.2;
 }
 
-.Modal {
-    padding: 24px;
-    position: relative;
+.modal-content {
     display: flex;
     flex-direction: column;
-    max-width: 80vw;
-    max-height: 80vh;
-
-    .modal-header {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-        margin-bottom: 24px;
-
-        h1 {
-            flex-grow: 1;
-            line-height: 1;
-        }
-
-        .close-button {
-            border: none;
-            background: none;
-            padding: 0;
-            cursor: pointer;
-            opacity: 0.65;
-            display: flex;
-
-            svg {
-                color: var(--text);
-            }
-        }
-    }
+    gap: 16px;
 }

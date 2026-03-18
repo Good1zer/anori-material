@@ -1,6 +1,7 @@
 import { Component, type ComponentProps, createContext, createRef, useContext, useRef, useState } from "react";
 import "./WidgetCard.scss";
-import { builtinIcons } from "@anori/components/icon/builtin-icons";
+import "@material/web/labs/card/elevated-card.js";
+import "@material/web/button/filled-tonal-button.js";
 import { useParentFolder } from "@anori/utils/FolderContentContext";
 import { useSizeSettings } from "@anori/utils/compact";
 import { type DndItemMeta, ensureDndItemType, useDraggable } from "@anori/utils/drag-and-drop";
@@ -14,10 +15,8 @@ import { WidgetMetadataContext } from "@anori/utils/plugins/widget";
 import type { Mapping } from "@anori/utils/types";
 import clsx from "clsx";
 import { type PanInfo, m, useMotionValue } from "framer-motion";
-import type { ReactNode } from "react";
+import type { ReactNode, PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { Button } from "./Button";
-import { Icon } from "./icon/Icon";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
@@ -174,7 +173,7 @@ export const WidgetCard = <WD extends WidgetDescriptor[], W extends WD[number]>(
 
   const { isEditing, grid, gridRef } = useParentFolder();
 
-  const { gapSize, rem } = useSizeSettings();
+  const { gapSize } = useSizeSettings();
   const ref = useRef<HTMLDivElement>(null);
   const runAfterRender = useRunAfterNextRender();
 
@@ -201,7 +200,7 @@ export const WidgetCard = <WD extends WidgetDescriptor[], W extends WD[number]>(
     },
     {
       onDragEnd,
-      whileDrag: { zIndex: 9, boxShadow: "0px 4px 4px 3px rgba(0,0,0,0.4)" },
+      whileDrag: { zIndex: 9 },
     },
   );
   const drag = type === "widget";
@@ -229,7 +228,7 @@ export const WidgetCard = <WD extends WidgetDescriptor[], W extends WD[number]>(
       id={instanceId ? `WidgetCard-${instanceId}` : undefined}
       ref={ref}
       key={`card-${instanceId}`}
-      className={clsx(className, "WidgetCard", !widget.appearance.withoutPadding && "with-padding")}
+      className={clsx(className, "WidgetCard-shell")}
       transition={{ ease: "easeInOut", duration: 0.15 }}
       exit={isEditing ? { scale: 0 } : undefined}
       whileHover={
@@ -250,7 +249,6 @@ export const WidgetCard = <WD extends WidgetDescriptor[], W extends WD[number]>(
         width: readonlyResizeWidth,
         height: readonlyResizeHeight,
         margin: gapSize,
-        boxShadow: isResizing ? "0px 4px 4px 3px rgba(0,0,0,0.4)" : "0px 0px 0px 0px rgba(0,0,0,0.0)",
         zIndex: isResizing || isDragging ? 9 : 0,
         position: type === "widget" ? "absolute" : undefined,
         top: isDragging ? (gridRef.current?.getBoundingClientRect().top ?? 0) + pixelPosition.y : pixelPosition.y,
@@ -261,47 +259,75 @@ export const WidgetCard = <WD extends WidgetDescriptor[], W extends WD[number]>(
       {...props}
     >
       {isEditing && type === "widget" && !!onDragEnd && (
-        <Button
-          className="drag-widget-btn"
-          onPointerDown={(e) => {
-            e.preventDefault();
-            setIsDragging(true);
-            runAfterRender(() => dragControls.start(e));
-          }}
-          onPointerUp={() => setIsDragging(false)}
-          withoutBorder
-          {...dragHandleProps}
-        >
-          <Icon icon={builtinIcons.dragHandle} width={rem(1.25)} height={rem(1.25)} />
-        </Button>
+        <div className="widget-action drag-widget-btn">
+          <md-filled-tonal-button
+            aria-label="Drag widget"
+            onPointerDown={(e: ReactPointerEvent) => {
+              e.preventDefault();
+              setIsDragging(true);
+              runAfterRender(() => dragControls.start(e.nativeEvent));
+            }}
+            onPointerUp={() => setIsDragging(false)}
+            {...dragHandleProps}
+          >
+            <span className="material-symbols-outlined">drag_indicator</span>
+          </md-filled-tonal-button>
+        </div>
       )}
       {isEditing && type === "widget" && !!onRemove && (
-        <Button className="remove-widget-btn" onClick={onRemove} withoutBorder>
-          <Icon icon={builtinIcons.close} width={rem(1.25)} height={rem(1.25)} />
-        </Button>
+        <div className="widget-action remove-widget-btn">
+          <md-filled-tonal-button
+            aria-label="Remove widget"
+            onClick={onRemove}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onRemove();
+              }
+            }}
+          >
+            <span className="material-symbols-outlined">close</span>
+          </md-filled-tonal-button>
+        </div>
       )}
       {isEditing && type === "widget" && !!onEdit && (
-        <Button className="edit-widget-btn" onClick={onEdit} withoutBorder>
-          <Icon icon={builtinIcons.pencil} width={rem(1.25)} height={rem(1.25)} />
-        </Button>
+        <div className="widget-action edit-widget-btn">
+          <md-filled-tonal-button
+            aria-label="Edit widget"
+            onClick={onEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onEdit();
+              }
+            }}
+          >
+            <span className="material-symbols-outlined">edit</span>
+          </md-filled-tonal-button>
+        </div>
       )}
       {isEditing && type === "widget" && !!widget.appearance.resizable && (
-        <m.div
-          className="resize-handle"
-          onPointerDown={(e) => e.preventDefault()}
-          onPanStart={startResize}
-          onPan={updateResize}
-          onPanEnd={finishResize}
-        >
-          <Icon icon={builtinIcons.resize} width={rem(1.25)} height={rem(1.25)} style={{ rotate: 90 }} />
-        </m.div>
-      )}
-      <ErrorBoundary>
-        <div className="overflow-protection">
-          {children}
-          {(type === "mock" || isResizing || isDragging) && <div className="interaction-blocker" />}
+        <div className="widget-action resize-handle">
+          <m.div
+            onPointerDown={(e) => e.preventDefault()}
+            onPanStart={startResize}
+            onPan={updateResize}
+            onPanEnd={finishResize}
+          >
+            <md-filled-tonal-button aria-label="Resize widget">
+              <span className="material-symbols-outlined">open_in_full</span>
+            </md-filled-tonal-button>
+          </m.div>
         </div>
-      </ErrorBoundary>
+      )}
+      <md-elevated-card>
+        <ErrorBoundary>
+          <div className={clsx("WidgetCard-content", !widget.appearance.withoutPadding && "with-padding")}>
+            {children}
+            {(type === "mock" || isResizing || isDragging) && <div className="interaction-blocker" />}
+          </div>
+        </ErrorBoundary>
+      </md-elevated-card>
     </m.div>
   );
 
