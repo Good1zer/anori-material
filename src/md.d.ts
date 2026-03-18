@@ -24,7 +24,7 @@ declare module "react" {
 
     interface IntrinsicElements {
       "md-switch": MdProps;
-      "md-outlined-text-field": MdProps;
+      "md-outlined-text-field": MdProps & { placeholder?: string };
       "md-filled-button": MdProps;
       "md-text-button": MdProps;
       "md-outlined-button": MdProps;
