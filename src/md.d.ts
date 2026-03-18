@@ -15,6 +15,7 @@ declare module "react" {
       value?: string;
       min?: number | string;
       max?: number | string;
+      placeholder?: string;
       onCancel?: (event: Event) => void;
       onClose?: (event?: Event) => void;
       onInput?: (event: Event) => void;

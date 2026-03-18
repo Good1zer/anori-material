@@ -1,13 +1,9 @@
 import type { Folder } from "@anori/utils/user-data/types";
 import "./NewWidgetWizard.scss";
-import { Button } from "@anori/components/Button";
 import { EmptyState } from "@anori/components/EmptyState";
-import { Input } from "@anori/components/Input";
 import { Modal } from "@anori/components/Modal";
 import { MotionScrollArea, ScrollArea } from "@anori/components/ScrollArea";
 import { WidgetCard } from "@anori/components/WidgetCard";
-import { Icon } from "@anori/components/icon/Icon";
-import { builtinIcons } from "@anori/components/icon/builtin-icons";
 import { availablePluginsWithWidgets } from "@anori/plugins/all";
 import type { GridContent, GridDimensions } from "@anori/utils/grid/types";
 import { findPositionForItemInGrid } from "@anori/utils/grid/utils";
@@ -19,6 +15,11 @@ import { useDirection } from "@radix-ui/react-direction";
 import { AnimatePresence, m } from "framer-motion";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import "@material/web/button/text-button.js";
+import "@material/web/labs/card/outlined-card.js";
+import "@material/web/list/list.js";
+import "@material/web/list/list-item.js";
+import "@material/web/textfield/outlined-text-field.js";
 
 export type NewWidgetWizardProps = {
   folder: Folder;
@@ -96,19 +97,21 @@ export const NewWidgetWizard = ({ onClose, folder, gridDimensions, layout }: New
       title={inConfigurationStage ? t("configureWidget") : t("addWidget")}
       headerButton={
         inConfigurationStage ? (
-          <Button
-            withoutBorder
+          <md-text-button
             onClick={() => {
               setSelectedPlugin(undefined);
               setSelectedWidget(undefined);
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setSelectedPlugin(undefined);
+                setSelectedWidget(undefined);
+              }
+            }}
           >
-            <Icon
-              icon={dir === "ltr" ? builtinIcons.chevronBack : builtinIcons.chevronForward}
-              width={24}
-              height={24}
-            />
-          </Button>
+            <span className="material-symbols-outlined">{dir === "ltr" ? "arrow_back" : "arrow_forward"}</span>
+          </md-text-button>
         ) : undefined
       }
       closable
@@ -141,35 +144,50 @@ export const NewWidgetWizard = ({ onClose, folder, gridDimensions, layout }: New
             animate={{ translateX: "0%", opacity: 1 }}
             exit={{ translateX: "50%", opacity: 0 }}
           >
-            <Input
-              className="search-input"
-              value={_searchQuery}
-              onValueChange={setSearchQuery}
-              placeholder={t("search")}
-              autoFocus
-            />
+            <div className="wizard-topbar">
+              <md-outlined-text-field
+                className="search-input"
+                type="search"
+                value={_searchQuery}
+                onInput={(e: Event) => {
+                  const value = (e.target as HTMLInputElement).value;
+                  setSearchQuery(value);
+                }}
+                label={t("search")}
+                placeholder={t("search")}
+              />
+            </div>
 
             {pluginsList.length === 0 ? (
               <EmptyState title={t("noResults")} />
             ) : (
               <div className="two-column-content">
                 <div className="plugins-sidebar">
-                  <ScrollArea className="plugins-list">
-                    {pluginsList.map((plugin) => (
-                      <button
-                        key={plugin.id}
-                        type="button"
-                        className="plugin-item"
-                        onClick={() => scrollToPlugin(plugin.id)}
-                      >
-                        <Icon icon={plugin.icon} className="plugin-icon" width={20} height={20} />
-                        <span>{plugin.name}</span>
-                      </button>
-                    ))}
-                  </ScrollArea>
+                  <md-outlined-card>
+                    <ScrollArea className="plugins-list">
+                      <md-list>
+                        {pluginsList.map((plugin) => (
+                          <md-list-item
+                            key={plugin.id}
+                            type="button"
+                            headline={plugin.name}
+                            onClick={() => scrollToPlugin(plugin.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                scrollToPlugin(plugin.id);
+                              }
+                            }}
+                          >
+                            <span slot="start" className="material-symbols-outlined">
+                              extension
+                            </span>
+                          </md-list-item>
+                        ))}
+                      </md-list>
+                    </ScrollArea>
+                  </md-outlined-card>
                 </div>
-
-                <div className="divider" />
 
                 <ScrollArea className="widgets-area">
                   <div className="new-widget-content">
@@ -181,27 +199,31 @@ export const NewWidgetWizard = ({ onClose, folder, gridDimensions, layout }: New
                             pluginSectionRefs.current[plugin.id] = el;
                           }}
                         >
-                          <h2>{plugin.name}</h2>
-                          <div className="widgets-mock-background">
-                            <div className="widgets-mocks">
-                              {plugin.widgets.map((widget) => (
-                                <div
-                                  role="button"
-                                  tabIndex={0}
-                                  key={widget.id}
-                                  onClick={() => onWidgetClick(widget, plugin)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter" || e.key === " ") {
-                                      onWidgetClick(widget, plugin);
-                                    }
-                                  }}
-                                >
-                                  <WidgetCard type="mock" widget={widget} plugin={plugin} />
-                                  <div className="widget-name">{widget.name}</div>
-                                </div>
-                              ))}
-                            </div>
+                          <div className="section-header">
+                            <h2>{plugin.name}</h2>
                           </div>
+                          <md-outlined-card>
+                            <div className="widgets-mock-background">
+                              <div className="widgets-mocks">
+                                {plugin.widgets.map((widget) => (
+                                  <div
+                                    role="button"
+                                    tabIndex={0}
+                                    key={widget.id}
+                                    onClick={() => onWidgetClick(widget, plugin)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter" || e.key === " ") {
+                                        onWidgetClick(widget, plugin);
+                                      }
+                                    }}
+                                  >
+                                    <WidgetCard type="mock" widget={widget} plugin={plugin} />
+                                    <div className="widget-name">{widget.name}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </md-outlined-card>
                         </section>
                       );
                     })}

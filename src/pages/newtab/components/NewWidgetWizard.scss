@@ -7,8 +7,13 @@
     padding: 0 18px;
     padding-bottom: 18px;
 
+    .wizard-topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
     .search-input {
-        margin: 2px;
         width: 100%;
     }
 
@@ -24,50 +29,15 @@
         display: flex;
         flex-direction: column;
 
+        md-outlined-card {
+            display: block;
+            height: 100%;
+        }
+
         .plugins-list {
             flex: 1;
-
-            .plugin-item {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 10px 12px;
-                border: none;
-                background: transparent;
-                color: var(--text);
-                border-radius: 8px;
-                cursor: pointer;
-                text-align: left;
-                transition: background-color 0.15s ease;
-                font-size: 14px;
-
-                &:hover {
-                    background-color: var(--background-lighter);
-                }
-
-                &.active {
-                    background-color: var(--accent-subtle);
-                    font-weight: 600;
-                }
-
-                .plugin-icon {
-                    color: var(--icon-color);
-                }
-
-                span {
-                    flex: 1;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-            }
+            padding: 6px;
         }
-    }
-
-    .divider {
-        height: 100%;
-        border-right: 1px solid var(--background-lighter);
     }
 
     .widgets-area {
@@ -83,10 +53,15 @@
         section {
             display: flex;
             flex-direction: column;
+            gap: 0.5rem;
+
+            .section-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
 
             .widgets-mock-background {
-                background-image: var(--background-image);
-                background-size: cover;
                 border-radius: 16px;
 
                 .widgets-mocks, .widgets-group {
